@@ -1,6 +1,35 @@
+server:
+  port: ${port:8080}
+management:
+  endpoint:
+    gateway:
+      enabled: true
 spring:
+  config:
+    import: classpath:env.properties
   application:
     name: GraalGatewayTest
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: ${GOOGLE_CLIENTID}
+            clientSecret: ${GOOGLE_CLIENTSECRET}
+            authorizationGrantType: authorization_code
+            redirect-uri:  https://d287-2804-7f2-6a4-8909-eab9-a9c1-af28-880.ngrok-free.app/login/oauth2/code/google
+            scope:
+              - openid
+              - email
+              - profile
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
   cloud:
     gateway:
       routes:
