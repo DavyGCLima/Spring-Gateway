@@ -1,5 +1,7 @@
 server:
   port: ${port:8080}
+  error:
+    include-message: always
 management:
   endpoint:
     gateway:
@@ -16,8 +18,7 @@ spring:
           google:
             clientId: ${GOOGLE_CLIENTID}
             clientSecret: ${GOOGLE_CLIENTSECRET}
-            authorizationGrantType: authorization_code
-            redirect-uri:  https://d287-2804-7f2-6a4-8909-eab9-a9c1-af28-880.ngrok-free.app/login/oauth2/code/google
+            redirect-uri: https://00f1-2804-7f2-6a4-8909-eab9-a9c1-af28-880.ngrok-free.app/login/oauth2/code/google
             scope:
               - openid
               - email
@@ -28,6 +29,7 @@ spring:
     password: ${DATASOURCE_PASSWORD}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
     hibernate:
       ddl-auto: update
   cloud:

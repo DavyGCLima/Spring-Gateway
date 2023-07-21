@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
@@ -20,23 +21,30 @@ import reactor.core.publisher.Mono;
 import javax.naming.AuthenticationException;
 import java.util.*;
 
-@Service
-public class CustomOAuth2UserService implements ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> {
+//@Service
+public class CustomOAuth2UserService extends DefaultReactiveOAuth2UserService {
+
+    public CustomOAuth2UserService() {
+        System.out.println("============== LOADING USER SERVICE");
+    }
 
     @Autowired
     private UserRepository userRepository;
 
-    private final DefaultReactiveOAuth2UserService delegate = new DefaultReactiveOAuth2UserService();
+//    private final DefaultReactiveOAuth2UserService delegate = new DefaultReactiveOAuth2UserService();
 
     @Override
     public Mono<OAuth2User> loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-//        OAuth2User user =  super.loadUser(userRequest);
-        try {
-            return processOAuth2User(userRequest, delegate.loadUser(userRequest));
-        } catch (Exception ex) {
-            // Throwing an instance of AuthenticationException will trigger the OAuth2AuthenticationFailureHandler
-            throw new InternalAuthenticationServiceException(ex.getMessage(), ex.getCause());
-        }
+        System.out.println("call load user ======================================================");
+        Mono<OAuth2User> user =  super.loadUser(userRequest);
+        return user;
+//        try {
+////            return processOAuth2User(userRequest, delegate.loadUser(userRequest));
+//            return processOAuth2User(userRequest, user);
+//        } catch (Exception ex) {
+//            // Throwing an instance of AuthenticationException will trigger the OAuth2AuthenticationFailureHandler
+//            throw new InternalAuthenticationServiceException(ex.getMessage(), ex.getCause());
+//        }
     }
 
     private Mono<OAuth2User> processOAuth2User(OAuth2UserRequest oAuth2UserRequest, Mono<OAuth2User> oAuth2User) throws AuthenticationException {

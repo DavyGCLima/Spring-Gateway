@@ -1,15 +1,14 @@
 package com.CodeCrusades.GraalGatewayTest.security;
 
+import com.CodeCrusades.GraalGatewayTest.filters.OAuth2UserFilter;
 import com.CodeCrusades.GraalGatewayTest.service.CustomOAuth2UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
@@ -18,13 +17,11 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProviderBuilder;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.web.DefaultReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 
@@ -33,11 +30,7 @@ import org.springframework.security.web.server.util.matcher.PathPatternParserSer
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
 
-
-    @Bean
-    public ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauthUserService() {
-        return new CustomOAuth2UserService();
-    }
+//    private OAuth2UserFilter oAuth2UserFilter;
 
     @Bean
     public MapReactiveUserDetailsService userDetailsService() {
@@ -49,28 +42,12 @@ public class SecurityConfiguration {
         return new MapReactiveUserDetailsService(user);
     }
 
-//    @Bean
-//    public ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
-//        final DefaultReactiveOAuth2UserService delegate = new DefaultReactiveOAuth2UserService();
-//
-//        return (userRequest) -> {
-//            // Delegate to the default implementation for loading a user
-//            return delegate.loadUser(userRequest)
-//                    .flatMap((oAuthUser) -> {
-//                        OAuth2AccessToken accessToken = userRequest.getAccessToken();
-//                        Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-//
-//                        // TODO
-//                        // 1) Fetch the authority information from the protected resource using accessToken
-//                        // 2) Map the authority information to one or more GrantedAuthority's and add it to mappedAuthorities
-//
-//                        // 3) Create a copy of oidcUser but use the mappedAuthorities instead
-//                        oidcUser = new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
-//
-//                        return Mono.just(oidcUser);
-//                    });
-//        };
-//    }
+    @Bean
+    public ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
+        CustomOAuth2UserService service = new CustomOAuth2UserService();
+//        service.setWebClient();
+        return service;
+    }
 
     @Bean
     public SecurityWebFilterChain configure(ServerHttpSecurity http) throws Exception {
@@ -98,10 +75,12 @@ public class SecurityConfiguration {
                 .oauth2Login((oauth2Login) ->
                     oauth2Login
                         .authenticationMatcher(new PathPatternParserServerWebExchangeMatcher("/login/oauth2/code/{registrationId}"))
-        )
-//                .authenticationSuccessHandler()
+
+                )
+//                .oauth2Login(Customizer.withDefaults())
 //                .authenticationFailureHandler()
-                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+//                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+//                .addFilterAfter(oAuth2UserFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
 
 

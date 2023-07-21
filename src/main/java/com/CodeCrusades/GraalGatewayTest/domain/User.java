@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -16,7 +15,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 
 @Getter
@@ -32,7 +30,6 @@ public class User implements OAuth2User, UserDetails {
     @Column(name = "id")
     private Long id;
 
-    @NonNull
     @NotNull
     private String name;
 
@@ -56,13 +53,13 @@ public class User implements OAuth2User, UserDetails {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Date createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+//    @CreatedDate
+//    @Column(name = "created_at", nullable = false, updatable = false)
+//    private LocalDateTime createdAt;
+//
+//    @LastModifiedDate
+//    @Column(name = "updated_at")
+//    private LocalDateTime updatedAt;
 
     public User(Long id, String name, String email, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
@@ -102,4 +99,16 @@ public class User implements OAuth2User, UserDetails {
     public boolean isEnabled() {
         return false;
     }
+
+
+//    @PrePersist
+//    public void prePersist() {
+//        this.createdAt = LocalDateTime.now();
+//        this.updatedAt = LocalDateTime.now();
+//    }
+//
+//    @PreUpdate
+//    public void preUpdate() {
+//        this.updatedAt = LocalDateTime.now();
+//    }
 }
