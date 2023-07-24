@@ -1,7 +1,9 @@
 package com.CodeCrusades.GraalGatewayTest.security;
 
 import com.CodeCrusades.GraalGatewayTest.filters.OAuth2UserFilter;
+import com.CodeCrusades.GraalGatewayTest.service.CustomAuthenticationSuccessHandler;
 import com.CodeCrusades.GraalGatewayTest.service.CustomOAuth2UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +26,9 @@ import org.springframework.security.oauth2.client.web.DefaultReactiveOAuth2Autho
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.WebFilterExchange;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
+import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 
 
@@ -42,12 +48,15 @@ public class SecurityConfiguration {
         return new MapReactiveUserDetailsService(user);
     }
 
-    @Bean
-    public ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
-        CustomOAuth2UserService service = new CustomOAuth2UserService();
-//        service.setWebClient();
-        return service;
-    }
+    // Another method to do the autentication
+//    @Bean
+//    public ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
+//        CustomOAuth2UserService service = new CustomOAuth2UserService();
+//        return service;
+//    }
+
+    @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
 
     @Bean
     public SecurityWebFilterChain configure(ServerHttpSecurity http) throws Exception {
@@ -75,11 +84,11 @@ public class SecurityConfiguration {
                 .oauth2Login((oauth2Login) ->
                     oauth2Login
                         .authenticationMatcher(new PathPatternParserServerWebExchangeMatcher("/login/oauth2/code/{registrationId}"))
-
+                            .authenticationSuccessHandler(successHandler)
                 )
 //                .oauth2Login(Customizer.withDefaults())
 //                .authenticationFailureHandler()
-//                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
 //                .addFilterAfter(oAuth2UserFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
 

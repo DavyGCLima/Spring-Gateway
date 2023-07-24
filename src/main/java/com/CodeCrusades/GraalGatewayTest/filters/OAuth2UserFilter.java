@@ -16,7 +16,7 @@ import javax.naming.AuthenticationException;
 import java.util.Objects;
 import java.util.Optional;
 
-@Component
+//@Component
 public class OAuth2UserFilter implements WebFilter {
 
     @Autowired
@@ -27,7 +27,7 @@ public class OAuth2UserFilter implements WebFilter {
         return exchange.getPrincipal()
                 .cast(Authentication.class)
                 .map(Authentication::getPrincipal)
-                .cast(OAuth2User.class)
+                .cast(User.class)
                 .doOnNext(oauth2User -> {
                     System.out.println(" -> filter");
                     try {

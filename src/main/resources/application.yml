@@ -2,6 +2,9 @@ server:
   port: ${port:8080}
   error:
     include-message: always
+logging:
+  level:
+    web: debug
 management:
   endpoint:
     gateway:
@@ -18,9 +21,8 @@ spring:
           google:
             clientId: ${GOOGLE_CLIENTID}
             clientSecret: ${GOOGLE_CLIENTSECRET}
-            redirect-uri: https://00f1-2804-7f2-6a4-8909-eab9-a9c1-af28-880.ngrok-free.app/login/oauth2/code/google
+            redirect-uri: https://595e-2804-56c-a093-1200-cd43-9996-4ff7-8730.ngrok-free.app/login/oauth2/code/google
             scope:
-              - openid
               - email
               - profile
   datasource:

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
@@ -53,7 +54,7 @@ public class User implements OAuth2User, UserDetails {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
-//    @CreatedDate
+//    @CreationTimestamp
 //    @Column(name = "created_at", nullable = false, updatable = false)
 //    private LocalDateTime createdAt;
 //
@@ -100,15 +101,4 @@ public class User implements OAuth2User, UserDetails {
         return false;
     }
 
-
-//    @PrePersist
-//    public void prePersist() {
-//        this.createdAt = LocalDateTime.now();
-//        this.updatedAt = LocalDateTime.now();
-//    }
-//
-//    @PreUpdate
-//    public void preUpdate() {
-//        this.updatedAt = LocalDateTime.now();
-//    }
 }
