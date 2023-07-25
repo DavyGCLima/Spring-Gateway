@@ -54,13 +54,13 @@ public class User implements OAuth2User, UserDetails {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
-//    @CreationTimestamp
-//    @Column(name = "created_at", nullable = false, updatable = false)
-//    private LocalDateTime createdAt;
-//
-//    @LastModifiedDate
-//    @Column(name = "updated_at")
-//    private LocalDateTime updatedAt;
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     public User(Long id, String name, String email, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
