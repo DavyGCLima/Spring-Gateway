@@ -19,7 +19,7 @@ public class PersistUser {
     @Autowired
     private UserRepository userRepository;
 
-    public Mono<OAuth2User> processOAuth2User(Optional<OAuth2UserRequest> oAuth2UserRequest, OAuth2User oAuth2User) throws AuthenticationException {
+    public Mono<OAuth2User> processOAuth2User(Optional<OAuth2UserRequest> oAuth2UserRequest, OAuth2User oAuth2User, String provider) throws AuthenticationException {
         if(oAuth2User == null) {
             throw new AuthenticationException("Cannot load user base data from web");
         }
@@ -38,39 +38,39 @@ public class PersistUser {
                         user.getProvider() + " account. Please use your " + user.getProvider() +
                         " account to login.");
             }
-            user = setUserDataNullable(user, oAuth2User, oAuth2UserRequest);
+            user = setUserDataNullable(user, oAuth2User, oAuth2UserRequest, provider);
         } else {
-            user = registerNewUser(oAuth2UserRequest, oAuth2User);
+            user = registerNewUser(oAuth2UserRequest, oAuth2User, provider);
         }
 
-        return Mono.just(User.create(user, oAuth2User.getAttributes()));
+        return Mono.just(User.create(user, oAuth2User.getAttributes(), Provider.valueOf(provider.toUpperCase())));
     }
 
-    private User registerNewUser(Optional<OAuth2UserRequest> oAuth2UserRequest, OAuth2User oAuth2UserInfo) {
-        User user = new User();
-        setUserDataNullable(user, oAuth2UserInfo, oAuth2UserRequest);
+    private User registerNewUser(Optional<OAuth2UserRequest> oAuth2UserRequest, OAuth2User oAuth2UserInfo, String provider) {
+        User user = setUserDataNullable(null, oAuth2UserInfo, oAuth2UserRequest, provider);
         userRepository.save(user);
         return user;
     }
 
-    private User setUserDataNullable(User user, OAuth2User oAuth2User, Optional<OAuth2UserRequest> oAuth2UserRequest) {
+    private User setUserDataNullable(User user, OAuth2User oAuth2User, Optional<OAuth2UserRequest> oAuth2UserRequest, String provider) {
         if(user == null) {
             User newUser = new User();
-            setUserData(newUser, oAuth2User, oAuth2UserRequest);
+            setUserData(newUser, oAuth2User, oAuth2UserRequest, provider);
             return newUser;
         }
 
-        setUserData(user, oAuth2User, oAuth2UserRequest);
+        setUserData(user, oAuth2User, oAuth2UserRequest, provider);
         return user;
     }
 
-    private void setUserData(User user, OAuth2User oAuth2User, Optional<OAuth2UserRequest> oAuth2UserRequest) {
+    private void setUserData(User user, OAuth2User oAuth2User, Optional<OAuth2UserRequest> oAuth2UserRequest, String provider) {
         oAuth2UserRequest.ifPresent(auth2UserRequest -> user.setProvider(Provider.valueOf(auth2UserRequest.getClientRegistration().getRegistrationId())));
         user.setProviderId((String) oAuth2User.getAttributes().get("sub"));
         user.setPassword((String) oAuth2User.getAttributes().get("sub"));
         user.setName((String) oAuth2User.getAttributes().get("given_name"));
         user.setEmail((String) oAuth2User.getAttributes().get("email"));
         user.setIsLocked(false);
+        user.setProvider(Provider.valueOf(provider.toUpperCase()));
     }
 
 }

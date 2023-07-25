@@ -29,7 +29,7 @@ public class CustomOAuth2UserService extends DefaultReactiveOAuth2UserService {
         System.out.println("call load user ======================================================");
         Mono<OAuth2User> user =  super.loadUser(userRequest);
         try {
-            return userService.processOAuth2User(Optional.of(userRequest), delegate.loadUser(userRequest).block());
+            return userService.processOAuth2User(Optional.of(userRequest), delegate.loadUser(userRequest).block(), userRequest.getClientRegistration().getClientName());
 //            return processOAuth2User(userRequest, user);
         } catch (Exception ex) {
             // Throwing an instance of AuthenticationException will trigger the OAuth2AuthenticationFailureHandler

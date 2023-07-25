@@ -21,7 +21,7 @@ spring:
           google:
             clientId: ${GOOGLE_CLIENTID}
             clientSecret: ${GOOGLE_CLIENTSECRET}
-            redirect-uri: https://595e-2804-56c-a093-1200-cd43-9996-4ff7-8730.ngrok-free.app/login/oauth2/code/google
+            redirect-uri: https://d20a-2804-56c-a1d8-8900-d4dc-d205-e535-3574.ngrok-free.app/login/oauth2/code/google
             scope:
               - email
               - profile
@@ -34,6 +34,8 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+  liquibase:
+    change-log: classpath:/config/liquibase/master.xml
   cloud:
     gateway:
       routes:

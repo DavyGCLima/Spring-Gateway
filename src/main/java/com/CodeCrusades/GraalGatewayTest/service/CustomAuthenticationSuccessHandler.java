@@ -3,6 +3,7 @@ package com.CodeCrusades.GraalGatewayTest.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -35,7 +36,7 @@ public class CustomAuthenticationSuccessHandler implements ServerAuthenticationS
         OAuth2User user = new DefaultOAuth2User(((OAuth2User)principal).getAuthorities(), ((OAuth2User)principal).getAttributes(), "name");
 
         try {
-            userService.processOAuth2User(Optional.empty(), user);
+            userService.processOAuth2User(Optional.empty(), user, ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId());
         } catch (AuthenticationException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

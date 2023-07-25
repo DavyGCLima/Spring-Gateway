@@ -1,5 +1,6 @@
 package com.CodeCrusades.GraalGatewayTest.filters;
 
+import com.CodeCrusades.GraalGatewayTest.domain.Provider;
 import com.CodeCrusades.GraalGatewayTest.repository.UserRepository;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,7 @@ public class OAuth2UserFilter implements WebFilter {
             user = registerNewUser(oAuth2User);
         }
 
-        return Mono.just(User.create(user, oAuth2User.getAttributes()));
+        return Mono.just(User.create(user, oAuth2User.getAttributes(), Provider.LOCAL));
     }
 
     private User registerNewUser(OAuth2User oAuth2UserInfo) {
