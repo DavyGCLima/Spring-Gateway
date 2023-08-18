@@ -1,5 +1,5 @@
 server:
-  port: ${port:8080}
+  port: ${port:8081}
   error:
     include-message: always
 logging:
@@ -16,8 +16,20 @@ spring:
     name: GraalGatewayTest
   security:
     oauth2:
+      resource-server:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/SpringBootKeycloak
       client:
+        provider:
+          keycloak:
+            issuerUri: http://localhost:8080/realms/SpringBootKeycloak
+            userNameAttribute: preferred_username
         registration:
+          keycloak:
+            clientId: loginApp
+            authorizationGrantType: authorization_code
+            scope:
+              - openid
           google:
             clientId: ${GOOGLE_CLIENTID}
             clientSecret: ${GOOGLE_CLIENTSECRET}

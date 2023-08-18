@@ -1,18 +1,16 @@
 package com.CodeCrusades.GraalGatewayTest.security;
 
-import com.CodeCrusades.GraalGatewayTest.filters.OAuth2UserFilter;
 import com.CodeCrusades.GraalGatewayTest.service.CustomAuthenticationSuccessHandler;
-import com.CodeCrusades.GraalGatewayTest.service.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,20 +18,17 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProviderBuilder;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.web.DefaultReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.WebFilterExchange;
-import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
-import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
+import reactor.core.publisher.Mono;
 
 
 @Configuration
 @EnableWebFluxSecurity
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfiguration {
 
 //    private OAuth2UserFilter oAuth2UserFilter;
@@ -55,17 +50,19 @@ public class SecurityConfiguration {
 //        return service;
 //    }
 
+
     @Autowired
     private CustomAuthenticationSuccessHandler successHandler;
 
     @Bean
-    public SecurityWebFilterChain configure(ServerHttpSecurity http) throws Exception {
+    public SecurityWebFilterChain configure(ServerHttpSecurity http, Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthenticationConverter) throws Exception {
         return http
                 .authorizeExchange((exchanges) ->
                         exchanges
-                                .pathMatchers("/oauth2/**", "/gateway/**", "/test/**", "/auth/**", "/login/**").permitAll()
+                                .pathMatchers("/oauth2/**", "/gateway/**", "/test/**", "/auth/**", "/login/**", "/admin/**").permitAll()
                                 // any URL that starts with /admin/ requires the role "ROLE_ADMIN"
-                                .pathMatchers("/admin/**").hasRole("ADMIN")
+//                                .pathMatchers("/admin/is-admin").hasAnyAuthority("ROLE_ADMIN")
+//                                .pathMatchers("/admin/has-role").hasAnyAuthority("ROLE_USER")
                                 // a POST to /users requires the role "USER_POST"
                                 .pathMatchers(HttpMethod.POST, "/users").hasAuthority("USER_POST")
                                 // a request to /users/{username} requires the current authentication's username
@@ -81,11 +78,14 @@ public class SecurityConfiguration {
                                 // any other request requires the user to be authenticated
                                 .anyExchange().authenticated()
                 )
-                .oauth2Login((oauth2Login) ->
-                    oauth2Login
-                        .authenticationMatcher(new PathPatternParserServerWebExchangeMatcher("/login/oauth2/code/{registrationId}"))
-                            .authenticationSuccessHandler(successHandler)
-                )
+//                .oauth2Login((oauth2Login) ->
+//                    oauth2Login
+//                        .authenticationMatcher(new PathPatternParserServerWebExchangeMatcher("/login/oauth2/code/{registrationId}"))
+//                        .authenticationSuccessHandler(successHandler)
+//                )
+                .oauth2ResourceServer(oAuth2ResourceServerSpec ->
+                        oAuth2ResourceServerSpec.jwt(jwtSpec ->
+                                jwtSpec.jwtAuthenticationConverter(jwtAuthenticationConverter)))
 //                .oauth2Login(Customizer.withDefaults())
 //                .authenticationFailureHandler()
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
@@ -114,26 +114,26 @@ public class SecurityConfiguration {
 //        return http.build();
     }
 
-    @Bean
-    public ReactiveOAuth2AuthorizedClientManager authorizedClientManager(
-            ReactiveClientRegistrationRepository clientRegistrationRepository,
-            ServerOAuth2AuthorizedClientRepository authorizedClientRepository) {
-
-        ReactiveOAuth2AuthorizedClientProvider authorizedClientProvider =
-                ReactiveOAuth2AuthorizedClientProviderBuilder.builder()
-                        .authorizationCode()
-                        .refreshToken()
-                        .clientCredentials()
-                        .password()
-                        .build();
-
-        DefaultReactiveOAuth2AuthorizedClientManager authorizedClientManager =
-                new DefaultReactiveOAuth2AuthorizedClientManager(
-                        clientRegistrationRepository, authorizedClientRepository);
-        authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
-
-        return authorizedClientManager;
-    }
+//    @Bean
+//    public ReactiveOAuth2AuthorizedClientManager authorizedClientManager(
+//            ReactiveClientRegistrationRepository clientRegistrationRepository,
+//            ServerOAuth2AuthorizedClientRepository authorizedClientRepository) {
+//
+//        ReactiveOAuth2AuthorizedClientProvider authorizedClientProvider =
+//                ReactiveOAuth2AuthorizedClientProviderBuilder.builder()
+//                        .authorizationCode()
+//                        .refreshToken()
+//                        .clientCredentials()
+//                        .password()
+//                        .build();
+//
+//        DefaultReactiveOAuth2AuthorizedClientManager authorizedClientManager =
+//                new DefaultReactiveOAuth2AuthorizedClientManager(
+//                        clientRegistrationRepository, authorizedClientRepository);
+//        authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+//
+//        return authorizedClientManager;
+//    }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
