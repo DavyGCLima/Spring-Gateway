@@ -63,6 +63,8 @@ public final class ReactiveKeycloakJwtAuthenticationConverter implements Convert
         JsonNode json = objectMapper.convertValue(jwt.getClaim("realm_access"), JsonNode.class);
         json.elements().forEachRemaining(
                 e -> e.elements().forEachRemaining(r -> rolesWithPrefix.add(createRole(r.asText()))));
+//        json.elements().forEachRemaining(
+//                e -> e.elements().forEachRemaining(r -> rolesWithPrefix.add(r.asText())));
         return rolesWithPrefix;
     }
 
@@ -81,6 +83,9 @@ public final class ReactiveKeycloakJwtAuthenticationConverter implements Convert
                     .forEachRemaining(e -> e
                             .elements()
                             .forEachRemaining(r -> rolesWithPrefix.add(createRole(jsonNode.getKey(), r.asText()))));
+//            .forEachRemaining(e -> e
+//                            .elements()
+//                            .forEachRemaining(r -> rolesWithPrefix.add(jsonNode.getKey().concat(r.asText()))));
         }
         return rolesWithPrefix;
     }

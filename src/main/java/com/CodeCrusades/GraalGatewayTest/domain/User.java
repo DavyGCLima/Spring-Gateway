@@ -103,4 +103,9 @@ public class User implements OAuth2User, UserDetails {
         return false;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.authorities;
+    }
+
 }

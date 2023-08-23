@@ -5,6 +5,8 @@ server:
 logging:
   level:
     web: debug
+    root: debug
+    sql: debug
 management:
   endpoint:
     gateway:

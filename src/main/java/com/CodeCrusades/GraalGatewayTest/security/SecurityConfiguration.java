@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +22,8 @@ import org.springframework.security.oauth2.client.registration.ReactiveClientReg
 import org.springframework.security.oauth2.client.web.DefaultReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import reactor.core.publisher.Mono;
@@ -59,9 +62,9 @@ public class SecurityConfiguration {
         return http
                 .authorizeExchange((exchanges) ->
                         exchanges
-                                .pathMatchers("/oauth2/**", "/gateway/**", "/test/**", "/auth/**", "/login/**", "/admin/**").permitAll()
+                                .pathMatchers("/oauth2/**", "/gateway/**", "/test/**", "/auth/**", "/login/**").permitAll()
                                 // any URL that starts with /admin/ requires the role "ROLE_ADMIN"
-//                                .pathMatchers("/admin/is-admin").hasAnyAuthority("ROLE_ADMIN")
+                                .pathMatchers("/admin/is-admin").hasAnyAuthority("ROLE_ADMIN")
 //                                .pathMatchers("/admin/has-role").hasAnyAuthority("ROLE_USER")
                                 // a POST to /users requires the role "USER_POST"
                                 .pathMatchers(HttpMethod.POST, "/users").hasAuthority("USER_POST")
@@ -89,6 +92,7 @@ public class SecurityConfiguration {
 //                .oauth2Login(Customizer.withDefaults())
 //                .authenticationFailureHandler()
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                .csrf(csrfSpec -> csrfSpec.disable())
 //                .addFilterAfter(oAuth2UserFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
 

@@ -17,7 +17,7 @@ import java.util.Collection;
 public class AdminAPI {
 
     @GetMapping("/is-admin")
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public Mono<ResponseEntity<Boolean>> isAdmin(Authentication authentication) {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         return Mono.just(ResponseEntity.ok().build());
